@@ -17,8 +17,8 @@ python eval_certified_densepure.py \
 --sigma $sigma \
 --N 10000 \
 --N0 100 \
---certified_batch 16 \
---sample_id $(seq -s ' ' 0 500 49500) \
+--certified_batch 120 \
+--sample_id $(seq -s ' ' 0 1000 49000) \
 --use_id \
 --certify_mode purify \
 --advanced_classifier beit \

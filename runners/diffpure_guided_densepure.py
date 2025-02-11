@@ -25,7 +25,7 @@ class GuidedDiffusion(torch.nn.Module):
         model_config.update(vars(self.config.model))
         print(f'model_config: {model_config}')
         model, diffusion = create_model_and_diffusion(**model_config)
-        model.load_state_dict(torch.load(f'{model_dir}/256x256_diffusion_uncond.pt', map_location='cpu'))
+        model.load_state_dict(torch.load("/mnt/home/diffusion-ars/imagenet/256x256_diffusion_uncond.pt"))
         model.requires_grad_(False).eval().to(self.device)
 
         if model_config['use_fp16']:
@@ -55,6 +55,9 @@ class GuidedDiffusion(torch.nn.Module):
                     self.t = t
                     break
             self.t = len(diffusion.alphas_cumprod)-1
+
+        print(f"jump to step {self.t}")
+        print(f"sigma is {sigma}")
 
     def image_editing_sample(self, img=None, bs_id=0, tag=None, sigma=0.0):
         assert isinstance(img, torch.Tensor)

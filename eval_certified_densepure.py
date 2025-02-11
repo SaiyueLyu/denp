@@ -44,7 +44,7 @@ class DensePure_Certify(nn.Module):
                 raise NotImplementedError('no classifier')
         elif args.domain == 'imagenet':
             if args.advanced_classifier=='beit':
-                self.classifier = timm.create_model('beit_large_patch16_512', checkpoint_path='pretrained/beit_large_patch16_512_pt22k_ft22kto1k.pth').cuda()
+                self.classifier = timm.create_model('beit_large_patch16_512', pretrained=True).cuda()
                 self.classifier.eval()
             elif args.advanced_classifier=='WRN':
                 self.classifier = timm.create_model('wide_resnet50_2', pretrained=True).cuda()
@@ -80,8 +80,8 @@ class DensePure_Certify(nn.Module):
 
     def forward(self, x, sample_id):
         counter = self.counter.item()
-        if counter % 5 == 0:
-            print(f'diffusion times: {counter}')
+        # if counter % 5 == 0:
+        #     print(f'diffusion times: {counter}')
 
         start_time = time()
         x_re = self.runner.image_editing_sample((x - 0.5) * 2, bs_id=counter, tag=self.tag, sigma=self.args.sigma)
@@ -96,10 +96,10 @@ class DensePure_Certify(nn.Module):
             else:
                 x_re = F.interpolate(x_re, size=(224, 224), mode='bicubic')
 
-        if counter % 5 == 0:
-            print(f'x shape (before diffusion models): {x.shape}')
-            print(f'x shape (before classifier): {x_re.shape}')
-            print("Sampling time per batch: {:0>2}:{:05.2f}".format(int(minutes), seconds))
+        # if counter % 5 == 0:
+        #     print(f'x shape (before diffusion models): {x.shape}')
+        #     print(f'x shape (before classifier): {x_re.shape}')
+        #     print("Sampling time per batch: {:0>2}:{:05.2f}".format(int(minutes), seconds))
 
         if self.args.advanced_classifier=='vit':
             self.classifier.eval()
@@ -350,9 +350,9 @@ def purified_certify(model, dataset, args, config):
             time_elapsed = str(datetime.timedelta(seconds=(after_time - before_time)))
             print("{}\t{}\t{}\t{:.3}\t{}\t{}".format(
                 i, label, prediction, radius, correct, time_elapsed), file=f, flush=True)
-            if args.save_predictions:
-                np.save(args.predictions_path+str(i)+'-'+str(args.reverse_seed)+'-n0_predictions.npy',n0_predictions)
-                np.save(args.predictions_path+str(i)+'-'+str(args.reverse_seed)+'-n_predictions.npy',n_predictions)
+            # if args.save_predictions:
+            #     np.save(args.predictions_path+str(i)+'-'+str(args.reverse_seed)+'-n0_predictions.npy',n0_predictions)
+            #     np.save(args.predictions_path+str(i)+'-'+str(args.reverse_seed)+'-n_predictions.npy',n_predictions)
         f.close()
 
     else:
@@ -375,9 +375,9 @@ def purified_certify(model, dataset, args, config):
             time_elapsed = str(datetime.timedelta(seconds=(after_time - before_time)))
             print("{}\t{}\t{}\t{:.3}\t{}\t{}".format(
                 i, label, prediction, radius, correct, time_elapsed), file=f, flush=True)
-            if args.save_predictions:
-                np.save(args.predictions_path+str(i)+'-'+str(args.reverse_seed)+'-n0_predictions.npy',n0_predictions)
-                np.save(args.predictions_path+str(i)+'-'+str(args.reverse_seed)+'-n_predictions.npy',n_predictions)
+            # if args.save_predictions:
+            #     np.save(args.predictions_path+str(i)+'-'+str(args.reverse_seed)+'-n0_predictions.npy',n0_predictions)
+            #     np.save(args.predictions_path+str(i)+'-'+str(args.reverse_seed)+'-n_predictions.npy',n_predictions)
         f.close()
 
 
