@@ -336,7 +336,13 @@ def purified_certify(model, dataset, args, config):
     print("idx\tlabel\tpredict\tradius\tcorrect\ttime", file=f, flush=True)
 
     # iterate through the dataset
+    seq=list(range(0,50000,1000))
+    arr = []
+    arr.append(seq[args.id_index])
+
     if args.use_id:
+        # for i in arr:
+        #     print(arr)
         for i in args.sample_id:
             (x, label) = dataset[i]
 
@@ -460,10 +466,12 @@ def parse_args_and_config():
     parser.add_argument('--clustering_batch', type=int, default=100)
     parser.add_argument("--clustering_method", type=str, default="none", help="classifier")
 
+    parser.add_argument('--id_index', type=int, default=0)
+
     args = parser.parse_args()
 
     # parse config file
-    with open(os.path.join('configs', args.config), 'r') as f:
+    with open(args.config, 'r') as f:
         config = yaml.safe_load(f)
     new_config = utils.dict2namespace(config)
 

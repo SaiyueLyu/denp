@@ -113,6 +113,8 @@ class GuidedDiffusion(torch.nn.Module):
                 for i in range(len(indices_t_steps)):
                     t = torch.tensor([len(indices_t_steps)-i-1] * x0.shape[0], device=self.device)
                     real_t = torch.tensor([indices_t_steps[i]] * x0.shape[0], device=self.device)
+                    # print(f" at i={i}, t is {t[0].item()}, real_t is {real_t[0].item()}, step is {len(indices_t_steps)-i}")
+
                     with torch.no_grad():
                         out = self.diffusion.p_sample(
                             self.model,
@@ -176,3 +178,5 @@ class GuidedDiffusion(torch.nn.Module):
                         torch.cuda.random.set_rng_state_all(global_cuda_state)
 
             return x0
+    
+    
