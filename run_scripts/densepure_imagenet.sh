@@ -26,5 +26,6 @@ CUDA_VISIBLE_DEVICES=0 python eval_certified_densepure.py \
 --num_t_steps $steps \
 --save_predictions \
 --predictions_path exp/imagenet/0- \
---reverse_seed $reverse_seed
+--reverse_seed $reverse_seed \
+--id_index 1
 

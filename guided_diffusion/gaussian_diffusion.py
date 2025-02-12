@@ -350,7 +350,7 @@ class GaussianDiffusion:
             return t.float() * (1000.0 / self.num_timesteps)
         return t
 
-    def condition_mean(self, cond_fn, p_mean_var, x, t, model_kwargs=None):
+    def condition_mean(self, cond_fn, p_mean_var, x, t, real_t, indices_t_steps, model_kwargs=None):
         """
         Compute the mean for the previous step, given a function cond_fn that
         computes the gradient of a conditional log probability with respect to
@@ -359,7 +359,12 @@ class GaussianDiffusion:
 
         This uses the conditioning strategy from Sohl-Dickstein et al. (2015).
         """
-        gradient = cond_fn(x, self._scale_timesteps(t), **model_kwargs)
+        var = p_mean_var["variance"]
+        mu_t = p_mean_var["mean"]
+        sqrt_alpha = _extract_into_tensor(self.sqrt_alphas_cumprod, real_t, x.shape)
+        sqrt_alpha_t_minus_one = _extract_into_tensor(self.sqrt_alphas_cumprod, indices_t_steps[1:][t[0].item()-1] * th.ones_like(real_t) , x.shape) #TODO check
+        gradient = cond_fn(x, self._scale_timesteps(real_t),var=var, sqrt_alpha=sqrt_alpha, sqrt_alpha_t_minus_one=sqrt_alpha_t_minus_one, mu_t=mu_t,**model_kwargs)
+
         new_mean = (
             p_mean_var["mean"].float() + p_mean_var["variance"] * gradient.float()
         )
@@ -390,7 +395,7 @@ class GaussianDiffusion:
         return out
 
     def p_sample(
-        self, model, x, t, clip_denoised=True, denoised_fn=None, model_kwargs=None, indices_t_steps=None, T=4000, step=None, real_t=None
+        self, model, x, t, clip_denoised=True, denoised_fn=None, cond_fn=None, model_kwargs=None, indices_t_steps=None, T=4000, step=None, real_t=None
     ):
         """
         Sample x_{t-1} from the model at the given timestep.
@@ -443,6 +448,10 @@ class GaussianDiffusion:
         nonzero_mask = (
             (t != 0).float().view(-1, *([1] * (len(x.shape) - 1)))
         )  # no noise when t == 0
+
+        if cond_fn is not None:
+            out["mean"] = self.condition_mean(cond_fn, out, x, t, real_t=real_t, indices_t_steps=indices_t_steps, model_kwargs=model_kwargs)
+
         sample = out["mean"] + nonzero_mask * th.exp(0.5 * out["log_variance"]) * noise
         return {"sample": sample, "pred_xstart": out["pred_xstart"]}
 

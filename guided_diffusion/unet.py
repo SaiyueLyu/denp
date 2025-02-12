@@ -631,7 +631,7 @@ class UNetModel(nn.Module):
         self.middle_block.apply(convert_module_to_f32)
         self.output_blocks.apply(convert_module_to_f32)
 
-    def forward(self, x, timesteps, y=None):
+    def forward(self, x, timesteps, y=None, **model_kwargs): #changed by Saiyue to allow other keys in model_kwargs
         """
         Apply the model to an input batch.
 

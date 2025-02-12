@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for ind in {0..49}; do
+for ind in {2..49}; do
     eai job new --preemptable --cpu 4 --gpu 1 --gpu-mem 32 --gpu-model-filter v100 --mem 16 -d snow.colab_public.data:/mnt/colab_public:rw -e HOME=/home/toolkit -d snow.home.saiyue_lyu:/mnt/home:rw -i registry.console.elementai.com/snow.interactive_toolkit/saiyue \
     -- /mnt/home/denp/bin/python /mnt/home/original/DensePure/eval_certified_densepure.py \
     --exp /mnt/home/original/DensePure/exp/imagenet \
@@ -10,7 +10,7 @@ for ind in {0..49}; do
     --seed 0 \
     --diffusion_type guided-ddpm \
     --lp_norm L2 \
-    --outfile /mnt/home/original/DensePure/sqrt2/denp_1.41421356237-$ind \
+    --outfile /mnt/home/original/DensePure/new/denp_-$ind \
     --sigma 1.41421356237 \
     --N 10000 \
     --N0 100 \

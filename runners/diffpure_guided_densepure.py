@@ -74,6 +74,8 @@ class GuidedDiffusion(torch.nn.Module):
             x0 = self.scale*(img)
             t = self.t
 
+            model_kwargs={"img" :  img}
+
             if self.args.use_clustering:
                 x0 = x0.unsqueeze(1).repeat(1,self.args.clustering_batch,1,1,1).view(batch_size*self.args.clustering_batch,3,256,256)
             self.model.eval()
@@ -121,6 +123,8 @@ class GuidedDiffusion(torch.nn.Module):
                             x0,
                             t,
                             clip_denoised=True,
+                            cond_fn = self.cond_fn,
+                            model_kwargs = model_kwargs,
                             indices_t_steps = indices_t_steps.copy(),
                             T = self.args.t_total,
                             step = len(indices_t_steps)-i,
@@ -179,4 +183,26 @@ class GuidedDiffusion(torch.nn.Module):
 
             return x0
     
-    
+    def cond_fn(self, x, t, **kwargs):
+        # scale = 2 * torch.ones(10).cuda()
+        scale = 0
+        # print(f"scale is {scale}")
+        var = kwargs["var"]
+        sqrt_alpha = kwargs["sqrt_alpha"]
+        sqrt_alpha_t_minus_one = kwargs["sqrt_alpha_t_minus_one"]
+        mean_t_minus_one = kwargs["mu_t"]
+
+        rescaled_original_img = kwargs["img"]
+        # print(f"x is {x.min():.3f}, {x.max():.3f}")
+        # print(f"x shape is {x.shape}")
+        # print(f"img is {rescaled_original_img.min()}, {rescaled_original_img.max()}")
+        # print(f"img shape is {rescaled_original_img.shape}")
+
+        guide = sqrt_alpha_t_minus_one * rescaled_original_img - mean_t_minus_one
+        guide = guide  * scale if t[0]!= 0 else torch.zeros_like(x)
+
+        # print(t[0].item())
+        # breakpoint()
+        # print(f"variance is {var.min().item():.3f}, {var.max().item():.3f}")
+        # print(f"guide value is {guide.min().item():.3f}, {guide.max().item():.3f}\n")
+        return guide

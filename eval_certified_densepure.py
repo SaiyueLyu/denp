@@ -341,9 +341,9 @@ def purified_certify(model, dataset, args, config):
     arr.append(seq[args.id_index])
 
     if args.use_id:
-        # for i in arr:
-        #     print(arr)
-        for i in args.sample_id:
+        for i in arr:
+            print(arr)
+        # for i in args.sample_id:
             (x, label) = dataset[i]
 
             before_time = time()
